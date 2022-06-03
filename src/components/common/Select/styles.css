@@ -1,0 +1,19 @@
+.Select {
+  width: fit-content;
+  position: relative;
+  z-index: 99999;
+}
+
+.Select .expanded-menu {
+  background-color: white;
+  position: absolute;
+  width: 130px;
+  border: 1px solid gray !important;
+  left: 100%;
+  top: 50%;
+}
+
+.Select .expanded-menu .Button {
+  display: flex;
+  width: 100%;
+}

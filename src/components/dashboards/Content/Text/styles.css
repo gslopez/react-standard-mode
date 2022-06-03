@@ -1,0 +1,8 @@
+.Text {
+  display: block;
+}
+
+.Text textarea {
+  width: 100%;
+  height: 100%;
+}

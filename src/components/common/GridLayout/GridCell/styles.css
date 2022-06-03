@@ -1,0 +1,5 @@
+.GridCell {
+  border: 1px solid blue !important;
+  margin: 4px;
+  position: relative;
+}

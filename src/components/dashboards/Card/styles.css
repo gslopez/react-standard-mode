@@ -1,0 +1,12 @@
+.DashboardCell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.DashboardCell .content {
+  border: 1px solid green !important;
+  margin: 4px;
+  flex: 1 1 auto;
+}

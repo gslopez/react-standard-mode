@@ -1,0 +1,8 @@
+.ReportLink {
+  height: 100%;
+  width: 100%;
+}
+
+.ReportLink .Report {
+  color: gray;
+}

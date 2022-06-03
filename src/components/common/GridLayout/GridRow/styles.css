@@ -1,0 +1,15 @@
+.GridRow {
+  border: 1px solid black !important;
+  display: flex;
+}
+
+.GridRow .cells-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.GridRow .left-actions {
+  display: flex;
+  align-items: center;
+}

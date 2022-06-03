@@ -1,0 +1,27 @@
+.Button {
+  height: fit-content;
+  width: fit-content;
+}
+.Button button {
+  background-color: white;
+  border: none;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  height: fit-content;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.Button button .icon,
+.Button button .label {
+  margin: 2px;
+}
+
+.Button button:hover {
+  background-color: #4f44e033;
+}
+
+.Button button .icon {
+  margin-right: 6px;
+}

@@ -1,0 +1,8 @@
+.grid .grid-footer {
+  height: 100px;
+}
+
+.grid .grid-footer .ContentAdder {
+  padding-top: 12px;
+  padding-left: 12px;
+}

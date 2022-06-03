@@ -1,0 +1,10 @@
+.ResizeController {
+  height: 100%;
+  width: 8px;
+  background-color: gray;
+  position: absolute;
+  top: 0px;
+  right: -8px;
+  z-index: 5000;
+  cursor: pointer;
+}
