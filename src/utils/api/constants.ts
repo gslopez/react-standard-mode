@@ -1,31 +1,46 @@
-const BOOKMARKS = [
-  {
+import { DashboardResponse } from "src/components/dashboards/types";
+
+const BOOKMARKS = {
+  101: {
     id: 101,
     title: `Report 101`,
     params: {
       metric: 101
     }
   },
-  {
+  102: {
     id: 102,
     title: `Report 102`,
     params: {
       metric: 102
     }
   }
-];
+};
 
-const TEXT_CARDS = [
-  {
+const TEXT_CARDS = {
+  301: {
     id: 301,
     markdown: `<p>This is a text card</p>`
   }
-];
+};
+
+const DASHBOARD_CARDS = {
+  201: {
+    id: 201,
+    title: `Link to Report 102`,
+    bookmark: {
+      id: 102,
+      params: {
+        metric: 85
+      }
+    }
+  }
+};
 
 const LAYOUT = {
   rows: {
     DYF1SRjy: {
-      cards: [
+      cells: [
         {
           id: `PXoTG74V`,
           width: 12,
@@ -36,7 +51,7 @@ const LAYOUT = {
       height: 336
     },
     v8KBmhCz: {
-      cards: [
+      cells: [
         {
           id: `3CPzPW8G`,
           width: 4,
@@ -63,28 +78,20 @@ const LAYOUT = {
   version: `2.0.0`
 };
 
-const DASHBOARD_CARDS = [
-  {
-    id: 201,
-    title: `Link to Report 102`,
-    bookmark: {
-      id: 102,
-      params: {
-        metric: 85
-      }
-    }
-  }
-];
-
-export const DASHBOARD_RESPONSE = {
+export const DASHBOARD_RESPONSE: {
+  status: string;
+  results: DashboardResponse;
+} = {
   status: `ok`,
   results: {
     id: 1212,
     title: `Most Important Dashboard`,
     layout: LAYOUT,
-    text_cards: TEXT_CARDS,
-    dashboard_cards: DASHBOARD_CARDS,
-    bookmarks: BOOKMARKS,
+    contents: {
+      text: TEXT_CARDS,
+      report: BOOKMARKS,
+      "report-link": DASHBOARD_CARDS
+    },
     is_favorited: false,
     filters: null
   }

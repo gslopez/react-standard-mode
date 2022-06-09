@@ -23,6 +23,7 @@ import {
   Emoji,
   getEmojiCardTitle
 } from "src/components/dashboards/Content/Emoji";
+import { Content } from "../types";
 
 function getContentRenderers({ content_type }) {
   // Inheritance is better here
@@ -54,19 +55,27 @@ function getContentRenderers({ content_type }) {
   throw new Error(`Error ##2 ${content_type} doesn't exist`);
 }
 
-export function Card({ card, on }: { card: any; on }) {
+export function Card({
+  contentType,
+  content,
+  on
+}: {
+  contentType: string;
+  content: Content;
+  on;
+}) {
   const { ContentOptions, Content, getCardTitle } = getContentRenderers({
-    content_type: card.content_type
+    content_type: contentType
   });
   return (
-    <div className={`DashboardCell cell-${card.id}`}>
-      <Header title={`${getCardTitle(card.content)}`}>
+    <div className={`DashboardCell`}>
+      <Header title={`${getCardTitle(content)}`}>
         <Select icon="☰">
-          <ContentOptions content={card.content} on={on} />
+          <ContentOptions content={content} on={on} />
         </Select>
       </Header>
       <div className="content">
-        <Content content={card.content} on={on} />
+        <Content content={content} on={on} />
       </div>
     </div>
   );

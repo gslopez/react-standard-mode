@@ -5,26 +5,47 @@ import { ContentAdder } from "src/components/dashboards/ContentAdder";
 import { Header } from "src/components/common/Header";
 
 import "./styles.css";
-import { GridRow } from "src/components/common/GridLayout/GridRow";
-import { GridCell } from "src/components/common/GridLayout/GridCell";
+
 import { Card } from "src/components/dashboards/Card";
 import { GridLayout } from "src/components/common/GridLayout";
 import {
   getDashboardRequest,
-  updateDashboardRequest,
-  getContentKey
+  updateDashboardRequest
 } from "src/components/dashboards/DashboardStandardMode/utils";
+import { DashboardResponse, GridRowType } from "../types";
+
+const getRowsWithoutContent = (
+  rows: { [rowId: string]: GridRowType },
+  contentType,
+  contentId
+) => {
+  const newRows = { ...rows };
+  console.log(Object.entries(rows));
+  Object.entries(rows).forEach(([rowId, row]) => {
+    rowId = `${rowId}`;
+    newRows[rowId] = { ...row };
+    newRows[rowId].cells = row.cells.filter((cell) => {
+      return !(
+        cell.content_type === contentType &&
+        `${cell.content_id}` === `${contentId}`
+      );
+    });
+    console.log(`${row.cells.length} === ${newRows[rowId].cells.length}`);
+  });
+  return newRows;
+};
 
 export function DashboardStandardMode() {
   // in the real version, we would read this from the URL
   const [dashboardIdFromURL] = useState(1212);
 
-  const [dashboard, setDashboard] = useState({
+  const [dashboard, setDashboard] = useState<DashboardResponse>({
+    id: 0,
     title: `Default title`,
-    layout: { order: [], rows: {} },
+    layout: { order: [], rows: {}, version: `` },
+    contents: {},
     filters: null,
-    is_favorited: false,
-    rows: []
+    is_favorited: false
   });
 
   useEffect(() => {
@@ -42,6 +63,58 @@ export function DashboardStandardMode() {
     );
     setDashboard({ ...updatedDashboard });
   };
+
+  const slots: { [cellId: string]: JSX.Element } = {};
+
+  Object.entries(dashboard.layout.rows).forEach(([rowId, row]) => {
+    row.cells.forEach(
+      ({ content_id: contentId, content_type: contentType }, cellIdx) => {
+        const content = dashboard.contents[contentType][contentId];
+        slots[`${contentType}-${contentId}`] = (
+          <Card
+            contentType={contentType}
+            content={content}
+            on={{
+              onContentUpdated: (updatedContent) => {
+                updateDashboard({
+                  contents: {
+                    ...dashboard.contents,
+                    [contentType]: {
+                      ...dashboard.contents[contentType],
+                      [updatedContent.id]: updatedContent
+                    }
+                  }
+                });
+              },
+              onCardDeleted: () => {
+                // we shouldn't update the dashboard without calling to .update
+                delete dashboard.contents[contentType][contentId];
+                dashboard.layout.rows[rowId].cells.splice(cellIdx, 1);
+                updateDashboard({});
+
+                // updateDashboard({
+                //   layout: {
+                //     ...dashboard.layout,
+                //     rows: getRowsWithoutContent(
+                //       dashboard.layout.rows,
+                //       contentType,
+                //       contentId
+                //     )
+                //   }
+                // });
+              }
+            }}
+          />
+        );
+      }
+    );
+  });
+
+  // Object.entries(dashboard.contents).forEach(([contentType, contentsMap]) => {
+  //   Object.entries(contentsMap).forEach(([contentId, content]) => {
+  //     slots[`${contentType}-${contentId}`] = <></>;
+  //   });
+  // });
 
   return (
     <div className="DashboardStandardMode">
@@ -66,87 +139,21 @@ export function DashboardStandardMode() {
         />
       </Header>
 
-      <GridLayout footer={<ContentAdder />}>
-        {dashboard.rows.map(({ id: rowId, height, cards }) => (
-          <GridRow
-            key={`card-${rowId}`}
-            id={rowId}
-            height={height}
-            addAction={<ContentAdder onContentAdded={null} />}
-          >
-            {cards.map((card, idx) => (
-              <GridCell
-                key={`card-${rowId}-${idx}`}
-                width={card.width}
-                onCellUpdated={(cellUpdates) => {
-                  const updatedCards = [...dashboard.layout.rows[rowId].cards];
-                  const delta = cellUpdates.width - updatedCards[idx].width;
-                  updatedCards[idx] = {
-                    ...updatedCards[idx],
-                    width: cellUpdates.width
-                  };
-                  updatedCards[idx + 1] = {
-                    ...updatedCards[idx + 1],
-                    width: updatedCards[idx + 1].width - delta
-                  };
-
-                  updateDashboard({
-                    layout: {
-                      ...dashboard.layout,
-                      rows: {
-                        ...dashboard.layout.rows,
-                        [rowId]: {
-                          ...dashboard.layout.rows[rowId],
-                          cards: updatedCards
-                        }
-                      }
-                    }
-                  });
-                }}
-              >
-                <Card
-                  card={card}
-                  on={{
-                    onContentUpdated: (updatedContent) => {
-                      const contentKey = getContentKey({
-                        content_type: card.content_type
-                      });
-                      updateDashboard({
-                        [contentKey]: dashboard[contentKey].map((content) =>
-                          content.id === updatedContent.id
-                            ? updatedContent
-                            : content
-                        )
-                      });
-                    },
-                    onCardDeleted: () => {
-                      const contentKey = getContentKey({
-                        content_type: card.content_type
-                      });
-                      updateDashboard({
-                        [contentKey]: dashboard[contentKey].filter(
-                          (content) => content.id !== card.content_id
-                        ),
-                        layout: {
-                          ...dashboard.layout,
-                          rows: {
-                            ...dashboard.layout.rows,
-                            [rowId]: {
-                              ...dashboard.layout.rows[rowId],
-                              cards: dashboard.layout.rows[rowId].cards.filter(
-                                (c) => c.id !== card.id
-                              )
-                            }
-                          }
-                        }
-                      });
-                    }
-                  }}
-                />
-              </GridCell>
-            ))}
-          </GridRow>
-        ))}
+      <GridLayout
+        footer={<ContentAdder />}
+        layout={dashboard.layout}
+        addActionEl={<ContentAdder onContentAdded={null} />}
+        onLayoutUpdated={({ layout: newLayout }) => {
+          updateDashboard({
+            layout: newLayout
+          });
+        }}
+        // these ones are contents!
+        slots={slots}
+      >
+        {/* in panel: */}
+        {/* <div slot=`text-101`>...</div> */}
+        {/* <div slot=`report-202`>...</div> */}
       </GridLayout>
     </div>
   );
